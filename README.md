@@ -16,14 +16,14 @@ Tensorflow
 Pluto==0.11.4(http://pluto-compiler.sourceforge.net/)  
 Clang/LLVM  
  
-##Generating dataset  
+## Generating dataset  
 We provide a dataset generator. This step assumes that you want generating your own dataset. You
  may add your source code manually to `data/source_code` , then run:  
 `python3 data_gen.py` and `python3 test.py`  
 
 **Note** that you need replace the `polycc` with your own.  
 
-##Prediction  with neural network model  
+## Prediction  with neural network model  
 Train and test:  
 `python3 train.py`
 
