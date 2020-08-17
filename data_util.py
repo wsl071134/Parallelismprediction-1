@@ -33,12 +33,12 @@ def get_regex_dict():
 def get_embeddings_dict():
     with open("embeddings/emb.p", 'rb') as f:
         embedding_matrix = pickle.load(f)
-    with open("embeddings\dic_pickle", 'rb') as f:
+    with open("embeddings/dic_pickle", 'rb') as f:
         stmt_dict = pickle.load(f)
     return embedding_matrix, stmt_dict
 
 
-def load_data(PARALLEL_DATA_FOLDER, UNPARALLEL_DATA_FOLDER, split=0.75, cut=False):
+def load_data(PARALLEL_DATA_FOLDER, UNPARALLEL_DATA_FOLDER, split=0.75):
 
     regex_dict = get_regex_dict()
     tag_dict = get_tag_dict()
@@ -58,10 +58,6 @@ def load_data(PARALLEL_DATA_FOLDER, UNPARALLEL_DATA_FOLDER, split=0.75, cut=Fals
         unparallel_g_list.append(G2)
 
 
-    if cut:
-        parallel_g_list, unparallel_g_list = cut_data(parallel_g_list, unparallel_g_list)
-
-
     split_i = math.ceil(min(len(parallel_g_list), len(unparallel_g_list)) * split)
     train_graph_list = parallel_g_list[:split_i]
     train_graph_list.extend(unparallel_g_list[:split_i])
@@ -77,69 +73,6 @@ def load_data(PARALLEL_DATA_FOLDER, UNPARALLEL_DATA_FOLDER, split=0.75, cut=Fals
     params.set('feature_dim', params.node_feature_dim + params.node_label_dim)
 
     return train_graph_list, test_graph_list, params
-
-
-
-def data_info(g_list):
-
-    node_sum = 0
-    edge_sum = 0
-    max1 = 0
-    max2 = 0
-    min1 = 9999999999
-    min2 = 9999999999
-    for G in g_list:
-        if G.num_nodes < min1:
-            min1 = G.num_nodes
-        if G.num_edges < min2:
-            min2 = G.num_edges
-        if G.num_nodes > max1:
-            max1 = G.num_nodes
-        if G.num_edges > max2:
-            max2 = G.num_edges
-        node_sum += G.num_nodes
-        edge_sum += G.num_edges
-
-    n_avg = node_sum / len(g_list)
-    e_avg = edge_sum / len(g_list)
-    return n_avg, e_avg
-
-
-def del_ne(g_list, n_avg, e_avg):
-    n = 0
-    e = 0
-    l1 = g_list[:]
-    for G in l1:
-        if G.num_edges > e_avg:
-            g_list.remove(G)
-            e += 1
-
-    l2 = g_list[:]
-    for G in l2:
-        if G.num_nodes > n_avg:
-            g_list.remove(G)
-            n += 1
-
-    return g_list
-
-
-def cut_data(parallel_g_list, unparallel_g_list):
-
-    g_list = []
-    g_list.extend(parallel_g_list)
-    g_list.extend(unparallel_g_list)
-
-    n_avg, e_avg = data_info(g_list)
-
-    parallel_g_list = del_ne(parallel_g_list, n_avg, e_avg)
-
-    unparallel_g_list = del_ne(unparallel_g_list, n_avg, e_avg)
-    g_list = []
-    g_list.extend(parallel_g_list)
-    g_list.extend(unparallel_g_list)
-
-    n_avg, e_avg = data_info(g_list)
-    return parallel_g_list, unparallel_g_list
 
 
 def batching(graph_batch, params):
